@@ -1,2 +1,6 @@
-<h1>Pages#home</h1>
-<p>Find me in app/views/pages/home.html.erb</p>
+<%= turbo_stream_from "audio-stream" %>
+<%= render "audio/form" %>
+<br />
+<h2>Previous Response</h2>
+<div id="audio-container">
+</div>
