@@ -1,10 +1,10 @@
 class Audio < ApplicationRecord
   has_one_attached :file
-  after_create :broadcast_audio
+  after_update_commit :broadcast_audio
 
 
   def broadcast_audio
-    broadcast_prepend_to(
+    broadcast_update_to(
       'audio-stream',
       target: 'audio-container',
       partial: 'audio/audio_container',
