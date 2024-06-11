@@ -3,4 +3,11 @@
 <br />
 <h2>Previous Response</h2>
 <div id="audio-container">
+    <% if @audios.present? %>
+        <% @audios.each do |audio| %>
+            <%= render partial: "audio/audio_container", locals: { 
+                audio: audio, 
+                autoplay: false } %>
+        <% end %>
+    <% end %>
 </div>

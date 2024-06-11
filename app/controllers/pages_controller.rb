@@ -1,5 +1,18 @@
 class PagesController < ApplicationController
   def home
-    @audio = Audio.all.order(created_at: :desc)
+    @audios = Audio.all.order(created_at: :desc)
+  end
+
+
+  def tts
+    TextToSpeechJob.perform_later(audio_params[:prompt])
+
+    redirect_to root_path, notice: "Audio is being generated. Please wait a few minutes."
+  end
+
+  private
+
+  def audio_params
+    params.permit(:authenticity_token, :commit, :prompt)
   end
 end
