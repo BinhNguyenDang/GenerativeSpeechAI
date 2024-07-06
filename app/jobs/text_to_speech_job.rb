@@ -2,7 +2,8 @@ class TextToSpeechJob < ApplicationJob
   queue_as :default
 
   def perform(prompt)
-    # Do something later
+    Rails.logger.info("Starting TextToSpeechJob for prompt: #{prompt}")
+
     response = Faraday.post('https://api.elevenlabs.io/v1/text-to-speech/tnSpp4vdxKPjI9w0GnoV') do |req|
       req.headers['accept'] = 'audio/mpeg'
       req.headers['xi-api-key'] = Rails.application.credentials.xi_api_key
@@ -16,12 +17,20 @@ class TextToSpeechJob < ApplicationJob
         }
       }.to_json
     end
-    blob = ActiveStorage::Blob.create_and_upload!(
-      io: StringIO.new(response.body),
-      filename: 'audio.mp3',
-      content_type: 'audio/mpeg'
-    )
 
-    Audio.create!(prompt:, file: blob)
+    if response.success?
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: StringIO.new(response.body),
+        filename: 'audio.mp3',
+        content_type: 'audio/mpeg'
+      )
+
+      audio = Audio.create!(prompt: prompt, file: blob)
+      Rails.logger.info("Successfully created Audio ##{audio.id} for prompt: #{prompt}")
+    else
+      Rails.logger.error("Failed to generate audio for prompt: #{prompt}")
+    end
+  rescue StandardError => e
+    Rails.logger.error("Error in TextToSpeechJob: #{e.message}")
   end
 end
