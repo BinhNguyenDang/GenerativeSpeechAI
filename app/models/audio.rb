@@ -1,5 +1,5 @@
 class Audio < ApplicationRecord
-  after_commit :broadcast_audio, on: [:create], if: :file_attached?
+  after_update_commit :broadcast_audio, if: :file_attached?
   has_one_attached :file
 
   private
@@ -9,9 +9,9 @@ class Audio < ApplicationRecord
   end
 
   def broadcast_audio
-    Turbo::StreamsChannel.broadcast_append_to(
+    Turbo::StreamsChannel.broadcast_update_to(
       "audio-stream",
-      target: "audio-container",
+      target: "audio-#{id}-container",
       partial: "audio/audio_container",
       locals: { audio: self, autoplay: false }
     )
